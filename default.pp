@@ -1,6 +1,7 @@
 
 $username = 'tk'
 $gui = true
+$privileged = true
 
 class dotfiles {
   file { "/home/$username/.vim":
@@ -67,6 +68,22 @@ vcsrepo { "/home/$username/dotfiles":
   before   => Class['dotfiles'],
 }
 
+class sshsettings {
+  if $privileged == true {
+    augeas { "ssh_config":
+      context => "/files/etc/ssh/ssh_config",
+      changes => [
+        "set TCPKeepAlive no",
+        "set ClientAliveInterval 25",
+        "set ClientAliveCountMax 3",
+        "set GSSAPIAuthenticaton no",
+        "set ForwardX11 yes",
+        ],
+    }
+  }
+}
+
 include dotfiles
 include mypackages
 include ruby_dev_environment
+include sshsettings
